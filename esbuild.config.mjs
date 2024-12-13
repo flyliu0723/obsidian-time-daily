@@ -69,7 +69,12 @@ const esbuildContext = await esbuild.context({
     logLevel: release ? "info" : "debug",
     sourcemap: release ? false : "inline",
     treeShaking: true,
-    plugins: [esbuildPluginVue3()]
+    plugins: [esbuildPluginVue3()],
+    loader: {
+        '.png': 'dataurl',
+        '.jpg': 'dataurl',
+        '.svg': 'text',
+    }
 });
 
 if (release) {
