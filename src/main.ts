@@ -22,10 +22,10 @@ export default class SamplePlugin extends Plugin {
     async activateView() {
         this.app.workspace.detachLeavesOfType(VIEW_TYPE_EXAMPLE);
     
-        await this.app?.workspace?.getRightLeaf(false)?.setViewState({
+        await this.app?.workspace?.getLeaf(true)?.setViewState({
           type: VIEW_TYPE_EXAMPLE,
-          active: true,
-        });
+          active: true
+        })
     
         this.app.workspace.revealLeaf(
           this.app.workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE)[0]

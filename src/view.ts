@@ -17,18 +17,23 @@ export class ExampleView extends ItemView {
     super(leaf);
     this.myApp = app
   }
-
+// 设置图标的方法
+  setIcon() {
+    this.icon = 'dice'; //项卡以反映新的图标
+  }
   getViewType() {
     return VIEW_TYPE_EXAMPLE;
   }
 
   getDisplayText() {
-    return "Example view";
+    return "my task daily";
   }
 
   async onOpen() {
     const container = this.containerEl.children[1];
     container.empty();
+    container.setText("Hello world");
+    this.setIcon()
     const app = createApp(daily);
     app.provide('myApp', this.app)
     app.mount(container);

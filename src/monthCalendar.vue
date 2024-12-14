@@ -1,83 +1,43 @@
 <template>
-  <tiny-calendar-view :events="eventslist" :year="2024" :month="12"></tiny-calendar-view>
+  <tiny-calendar-view :events="eventslist" :year="yearCurrent" :month="monthCurrent"></tiny-calendar-view>
 </template>
   
   <script lang="ts">
   import { addDays, isYesterday } from 'date-fns'
-  import { defineComponent, ref } from 'vue'
+  import { defineComponent, ref, toRef } from 'vue'
   import { TinyCalendarView } from '@opentiny/vue'
 
   export default defineComponent({
     components: {TinyCalendarView},
-    setup() {
-      let eventslist = ref([
-        {
-          title: '前端周会1',
-          start: '2024-12-15 8:30:00',
-          end: '2024-12-15 9:00:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'blue'
-        },
-        {
-          title: '前端周会2',
-          start: '2024-12-15 10:00:00',
-          end: '2024-12-15 12:00:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'green'
-        },
-        {
-          title: '前端周会2-1',
-          start: '2024-12-15 13:00:00',
-          end: '2024-12-15 15:00:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'red'
-        },
-        {
-          title: '前端周会3',
-          start: '2024-12-16 9:00:00',
-          end: '2024-12-16 10:00:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'yellow'
-        },
-        {
-          title: '前端周会4',
-          start: '2024-12-16 11:00:00',
-          end: '2024-12-16 14:00:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'purple'
-        },
-        {
-          title: '前端周会5',
-          start: '2024-12-25 8:00:00',
-          end: '2024-12-25 9:00:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'cyan'
-        },
-        {
-          title: '前端周会6',
-          start: '2024-12-26 8:00:00',
-          end: '2024-12-26 11:30:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'blue'
-        },
-        {
-          title: '前端周会7',
-          start: '2024-12-27 8:30:00',
-          end: '2024-12-27 9:30:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'blue'
-        },
-        {
-          title: '节假日25-28',
-          start: '2024-12-25 10:30:00',
-          end: '2024-12-28 03:30:00',
-          content: '日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注日程备注',
-          theme: 'green'
-        }
-      ])
+    props: {
+      taskList: Array
+    },
+    setup(props: {}) {
+      let eventslist = toRef(props, 'taskList')
+      // 获取当前日期对象
+      const now = new Date();
+
+      // 获取当前年份
+      const year = now.getFullYear();
+
+      // 获取当前月份，月份是从0开始的，所以需要加1
+      const month = now.getMonth() + 1;
+
+      console.log(`当前年份：${year}`);
+      console.log(`当前月份：${month}`);
+      let yearCurrent = ref(year), monthCurrent = ref(month)
       return {
-        eventslist
+        eventslist,
+        yearCurrent,
+        monthCurrent
       }
     }
   })
   </script>
+  <style>
+.tiny-calendar-view .tiny-calendar-view-month__main .main-container > ul > li{
+ height: auto;
+ max-height: 150px; 
+ min-height: 70px;
+}
+</style>
