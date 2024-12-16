@@ -38,8 +38,8 @@ export default defineComponent({
             let files = myApp.vault.getAbstractFileByPath('01Inbox/daily').children.filter((item: TFile) => item.name != 'archives')
             // .map((item: TFile) => ({...item, todos: []}));
             
-            let allTodos = []
-            files.forEach(async (file: any, index) => {
+            let allTodos: Object[] = []
+            files.forEach(async (file: any, index: number) => {
                 if (file && file.path) {
                     try {
                         const fileContent = await myApp.vault.read(file);
@@ -59,12 +59,12 @@ export default defineComponent({
             })
             formatTime()
         })
-        function parseTodos(content: string, date: string): string[] {
+        function parseTodos(content: string, date: string): TaskFormat[] {
             const regex = /- \[([x ])\] .*/g;
 
             let matches = content.match(regex);
             if (matches) {
-                let result: string[] = matches.map((item: string) => formatTask(item, date));
+                let result: TaskFormat[] = matches.map((item: string) => formatTask(item, date));
                 
                 return result
             } else {
@@ -110,7 +110,17 @@ export default defineComponent({
             content: string,
             theme: string
         }
-        let taskColos = {
+        interface TaskColos {
+            [key: string]: string;
+            work: 'blue';
+            learn: 'green';
+            life: 'red';
+            study: 'yellow';
+            other: 'purple';
+            daily: 'pink';
+        }
+
+        let taskColos:TaskColos = {
             'work': 'blue',
             'learn': 'green',
             'life': 'red',

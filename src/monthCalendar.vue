@@ -1,10 +1,14 @@
 <template>
-  <tiny-calendar-view :events="eventslist" :year="yearCurrent" :month="monthCurrent"></tiny-calendar-view>
+  <tiny-calendar-view :events="showEventList" :year="yearCurrent" :month="monthCurrent" @month-change="monthChange">
+    <template #header="{ slotScope }">
+      <p>{{ slotScope.content }}</p>
+    </template>
+  </tiny-calendar-view>
 </template>
   
   <script lang="ts">
   import { addDays, isYesterday } from 'date-fns'
-  import { defineComponent, ref, toRef } from 'vue'
+  import { defineComponent, ref, toRef, computed } from 'vue'
   import { TinyCalendarView } from '@opentiny/vue'
 
   export default defineComponent({
@@ -13,7 +17,7 @@
       taskList: Array
     },
     setup(props: {}) {
-      let eventslist = toRef(props, 'taskList')
+      let eventslist = toRef<object[]>(props, 'taskList')
       // 获取当前日期对象
       const now = new Date();
 
@@ -25,11 +29,31 @@
 
       console.log(`当前年份：${year}`);
       console.log(`当前月份：${month}`);
+      interface TaskFormat {
+        title: string,
+        start: string,
+        end: string,
+        content: string,
+        theme: string
+      }
       let yearCurrent = ref(year), monthCurrent = ref(month)
+
+      
+      let showEventList = computed(() => {
+        return eventslist.value.filter((item: TaskFormat) => {
+          let yearMonth = item.start.split(' ')[0].split('-')
+          return Number(yearMonth[0]) == yearCurrent.value && Number(yearMonth[1]) == monthCurrent.value
+        })
+      })
+      function monthChange(newVal: string, oldVal: string) {
+        monthCurrent.value = Number(newVal)
+      }
       return {
         eventslist,
         yearCurrent,
-        monthCurrent
+        monthCurrent,
+        monthChange,
+        showEventList
       }
     }
   })
