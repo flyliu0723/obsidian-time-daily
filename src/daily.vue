@@ -1,7 +1,8 @@
 <template>
     <div class="daily-container">
         <div class="content">
-            <month-calendar v-if="renderCanledar" :taskList="taskList"/>
+            <month-calendar v-if="renderCanledar && !showTimeLine" :taskList="taskList" @show-time-line-action="showTimeLineAction"/>
+             <task v-if="renderCanledar && showTimeLine" :taskList="taskList"  @show-time-line-action="showTimeLineAction"/>
         </div>
     </div>
 </template>
@@ -10,11 +11,12 @@
 import { App, TFile } from 'obsidian'
 import { defineComponent, ref, onMounted, defineProps, toRef, inject } from "vue";
 import monthCalendar from './monthCalendar.vue'
+import task from './task.vue'
 import { myAppInterface } from './interfaces'
 export default defineComponent({
     name: "Daily",
     components: {
-        monthCalendar,
+        monthCalendar, task
     },
     setup(props: myAppInterface) {
         interface Times {
@@ -108,7 +110,8 @@ export default defineComponent({
             start: string,
             end: string,
             content: string,
-            theme: string
+            theme: string,
+            tag: string
         }
         interface TaskColos {
             [key: string]: string;
@@ -142,33 +145,36 @@ export default defineComponent({
             if (match) {
                 // 如果匹配到带时间范围的字符串
                 return {
-                    title: `${match[4].trim()}`, // 返回task/work格式的title
+                    title: `${match[4].trim()}`.slice(0, 15), // 返回task/work格式的title
                     start: date + ' ' + match[2],
                     end: date + ' ' + match[3],
                     content: `${match[4].trim()}  ${match[6]}`,
-                    theme: taskColos[match[6]] || 'pink'
+                    theme: taskColos[match[6]] || 'pink',
+                    tag: match[6]
                 };
             } else {
                 match = input.match(withSingleTimeRegex);
                 if (match) {
                     // 如果匹配到带单个时间点的字符串
                     return {
-                        title: `${match[3].trim()}`, // 返回task/work格式的title
+                        title: `${match[3].trim()}`.slice(0, 15), // 返回task/work格式的title
                         start: date + ' ' + match[2],
                         end: date + ' ' + match[2],
                         content: `${match[3].trim()}  ${match[5]}`,
-                    theme: taskColos[match[5]] || 'pink'
+                        theme: taskColos[match[5]] || 'pink',
+                        tag: match[5]
                     };
                 } else {
                     match = input.match(withoutTimeRegex);
                     if (match) {
                         // 如果匹配到不带时间的字符串
                         return {
-                            title: `${match[1].trim()}`, // 返回task/work格式的title
+                            title: `${match[1].trim()}`.slice(0, 15), // 返回task/work格式的title
                             start: date,
                             end: date,
                             content: `${match[1].trim()}  ${match[4]}`,
-                            theme: taskColos[match[4]] || 'pink'
+                            theme: taskColos[match[4]] || 'pink',
+                            tag: match[4]
                         };
                     } else {
                         // 如果都不匹配，抛出错误
@@ -177,9 +183,15 @@ export default defineComponent({
                 }
             }
         }
+        let showTimeLine = ref<boolean>(false)
+        function showTimeLineAction(type: boolean) {
+            showTimeLine.value = type
+        }
         return {
             taskList,
-            renderCanledar
+            renderCanledar,
+            showTimeLine,
+            showTimeLineAction
         }
     }
 })

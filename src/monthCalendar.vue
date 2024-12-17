@@ -2,8 +2,11 @@
   <tiny-calendar-view :events="showEventList" :year="yearCurrent" :month="monthCurrent" 
     @month-change="monthChange" @mode-change="modeChange" @week-change="weekChange"
   >
+  <template #tool>
+    <time-line-icon @click="showTimeLineAction(true)" class="icon-timeline"/>
+  </template>
     <template #header="{ slotScope }">
-      <p>{{ slotScope.date }} {{ slotScope.weekDay }}</p>
+      <p>{{ slotScope.weekDay }}</p>
     </template>
   </tiny-calendar-view>
 </template>
@@ -12,13 +15,15 @@
   import { addDays, isYesterday } from 'date-fns'
   import { defineComponent, ref, toRef, computed } from 'vue'
   import { TinyCalendarView } from '@opentiny/vue'
+  import {IconRichTextListUnordered} from '@opentiny/vue-icon'
 
   export default defineComponent({
     components: {TinyCalendarView},
     props: {
       taskList: Array
     },
-    setup(props: {}) {
+    emits: ['show-time-line-action'],
+    setup(props: {}, {emit}) {
       let eventslist = toRef<object[]>(props, 'taskList')
       // 获取当前日期对象
       const now = new Date();
@@ -52,9 +57,16 @@
       }
       function modeChange(val: string) {
         console.log(val)
+        showTimeLineAction(false)
       }
       function weekChange(weekDate: []) {
         console.log(weekDate)
+      }
+
+      const timeLineIcon = IconRichTextListUnordered()
+
+      function showTimeLineAction(type: boolean) {
+        emit('show-time-line-action', type)
       }
       return {
         eventslist,
@@ -64,6 +76,8 @@
         modeChange,
         weekChange,
         showEventList,
+        timeLineIcon,
+        showTimeLineAction
       }
     }
   })
@@ -73,5 +87,11 @@
  height: auto;
  max-height: 150px; 
  min-height: 70px;
+}
+.icon-timeline{
+  font-size: 18px;
+  color: #191919;
+  padding: 10px;
+  display: inline-block;
 }
 </style>
