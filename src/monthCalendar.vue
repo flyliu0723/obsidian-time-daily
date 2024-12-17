@@ -1,7 +1,9 @@
 <template>
-  <tiny-calendar-view :events="showEventList" :year="yearCurrent" :month="monthCurrent" @month-change="monthChange">
+  <tiny-calendar-view :events="showEventList" :year="yearCurrent" :month="monthCurrent" 
+    @month-change="monthChange" @mode-change="modeChange" @week-change="weekChange"
+  >
     <template #header="{ slotScope }">
-      <p>{{ slotScope.content }}</p>
+      <p>{{ slotScope.date }} {{ slotScope.weekDay }}</p>
     </template>
   </tiny-calendar-view>
 </template>
@@ -48,12 +50,20 @@
       function monthChange(newVal: string, oldVal: string) {
         monthCurrent.value = Number(newVal)
       }
+      function modeChange(val: string) {
+        console.log(val)
+      }
+      function weekChange(weekDate: []) {
+        console.log(weekDate)
+      }
       return {
         eventslist,
         yearCurrent,
         monthCurrent,
         monthChange,
-        showEventList
+        modeChange,
+        weekChange,
+        showEventList,
       }
     }
   })

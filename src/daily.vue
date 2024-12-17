@@ -142,10 +142,10 @@ export default defineComponent({
             if (match) {
                 // 如果匹配到带时间范围的字符串
                 return {
-                    title: `${match[4].trim()}  ${match[5]}/${match[6]}`, // 返回task/work格式的title
+                    title: `${match[4].trim()}`, // 返回task/work格式的title
                     start: date + ' ' + match[2],
                     end: date + ' ' + match[3],
-                    content: match[4].trim(),
+                    content: `${match[4].trim()}  ${match[6]}`,
                     theme: taskColos[match[6]] || 'pink'
                 };
             } else {
@@ -153,10 +153,10 @@ export default defineComponent({
                 if (match) {
                     // 如果匹配到带单个时间点的字符串
                     return {
-                        title: `${match[3].trim()}  ${match[4]}/${match[5]}`, // 返回task/work格式的title
+                        title: `${match[3].trim()}`, // 返回task/work格式的title
                         start: date + ' ' + match[2],
                         end: date + ' ' + match[2],
-                        content: match[3].trim(),
+                        content: `${match[3].trim()}  ${match[5]}`,
                     theme: taskColos[match[5]] || 'pink'
                     };
                 } else {
@@ -164,10 +164,10 @@ export default defineComponent({
                     if (match) {
                         // 如果匹配到不带时间的字符串
                         return {
-                            title: `${match[1].trim()}  ${match[3]}/${match[4]}`, // 返回task/work格式的title
+                            title: `${match[1].trim()}`, // 返回task/work格式的title
                             start: date,
                             end: date,
-                            content: match[1].trim(),
+                            content: `${match[1].trim()}  ${match[4]}`,
                             theme: taskColos[match[4]] || 'pink'
                         };
                     } else {
