@@ -1,12 +1,9 @@
 <template>
   <tiny-calendar-view :events="showEventList" :year="yearCurrent" :month="monthCurrent" 
-    @month-change="monthChange" @mode-change="modeChange" @week-change="weekChange"
+    @month-change="monthChange" @mode-change="modeChange" @week-change="weekChange" @year-change="yearChange"
   >
-  <template #tool>
-    <time-line-icon @click="showTimeLineAction(true)" class="icon-timeline"/>
-  </template>
     <template #header="{ slotScope }">
-      <p>{{ slotScope.weekDay }}</p>
+      <p>{{ slotScope.date }}{{ slotScope.weekDay }}</p>
     </template>
   </tiny-calendar-view>
 </template>
@@ -54,6 +51,11 @@
       })
       function monthChange(newVal: string, oldVal: string) {
         monthCurrent.value = Number(newVal)
+        console.log(monthCurrent.value, 'month')
+      }
+      function yearChange(newVal: string) {
+        yearCurrent.value = Number(newVal)
+        console.log(yearCurrent.value, 'year')
       }
       function modeChange(val: string) {
         console.log(val)
@@ -73,6 +75,7 @@
         yearCurrent,
         monthCurrent,
         monthChange,
+        yearChange,
         modeChange,
         weekChange,
         showEventList,
@@ -83,15 +86,38 @@
   })
   </script>
   <style>
+.tiny-calendar-view .tiny-calendar-view-month__main .main-container > ul{
+  min-height: 100px;
+}
 .tiny-calendar-view .tiny-calendar-view-month__main .main-container > ul > li{
  height: auto;
- max-height: 150px; 
- min-height: 70px;
+ max-height: 140px; 
+ min-height: 120px;
 }
 .icon-timeline{
   font-size: 18px;
   color: #191919;
   padding: 10px;
   display: inline-block;
+}
+.events-item{
+  min-height: 30px;
+  overflow: auto;
+}
+.tiny-calendar-view .tiny-calendar-view-week__timeline .day-times ul > li{
+  height: 30px;
+}
+ul>li{
+  min-height: 2em;
+}
+.tiny-calendar-view{
+  height: 100%;
+  overflow: hidden;
+}
+.tiny-calendar-view-week{
+  height: calc(100% - 70px);
+}
+.tiny-calendar-view .tiny-calendar-view-week__timeline, .tiny-calendar-view .tiny-calendar-view-week__schedule{
+  height: 100%;
 }
 </style>

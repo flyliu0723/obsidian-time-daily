@@ -1,8 +1,11 @@
 <template>
     <div class="daily-container">
         <div class="content">
-            <month-calendar v-if="renderCanledar && !showTimeLine" :taskList="taskList" @show-time-line-action="showTimeLineAction"/>
-             <task v-if="renderCanledar && showTimeLine" :taskList="taskList"  @show-time-line-action="showTimeLineAction"/>
+            <month-calendar :taskList="taskList" @show-time-line-action="showTimeLineAction"/>
+             <!-- <task v-if="renderCanledar && showTimeLine" :taskList="taskList"  @show-time-line-action="showTimeLineAction"/> -->
+        </div>
+        <div class="task">
+            <task :taskList="taskList"  @show-time-line-action="showTimeLineAction"/>
         </div>
     </div>
 </template>
@@ -39,18 +42,22 @@ export default defineComponent({
         onMounted(async () => {
             let files = myApp.vault.getAbstractFileByPath('01Inbox/daily').children.filter((item: TFile) => item.name != 'archives')
             // .map((item: TFile) => ({...item, todos: []}));
-            
+            let realFiles: any[] = []
+            formatRealFile(files, realFiles)
+            console.log(realFiles, 1112222)
             let allTodos: Object[] = []
-            files.forEach(async (file: any, index: number) => {
+            realFiles.forEach(async (file: any, index: number) => {
                 if (file && file.path) {
                     try {
+                        console.log(file, 222)
                         const fileContent = await myApp.vault.read(file);
+                        console.log(fileContent, 333)
                         const todos = parseTodos(fileContent, file.name.replace('.md', ''));
                         file.todos = todos || []
                         allTodos = [...allTodos, ...todos]
-                        if(index == files.length - 1) {
+                        if(index == realFiles.length - 1) {
                             taskList.value = allTodos
-                            dailyList.value = files;
+                            dailyList.value = realFiles;
                             renderCanledar.value = true
 
                         }
@@ -61,6 +68,16 @@ export default defineComponent({
             })
             formatTime()
         })
+        function formatRealFile(files: [], result: any[]) {
+            console.log(files, 222111)
+            files.forEach((item: any) => {
+                if(item.children && item.children.length) {
+                    formatRealFile(item.children, result)
+                }else {
+                    result.push(item)
+                }
+            })
+        }
         function parseTodos(content: string, date: string): TaskFormat[] {
             const regex = /- \[([x ])\] .*/g;
 
@@ -207,7 +224,6 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
     border: solid 1px #f0f5f9;
     padding: 10px 0;
 }
@@ -220,8 +236,13 @@ export default defineComponent({
 .daily-container .content {
     flex: 1;
     height: 100%;
+    display: inline-block;
 }
-
+.daily-container .task{
+    width: 300px;
+    height: 100%;
+    display: inline-block;
+}
 
 
 .daily-container .years-box {

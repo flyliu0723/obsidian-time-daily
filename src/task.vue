@@ -1,36 +1,32 @@
 <template>
     <div class="page-container">
-        <div>
-            <back-action-icon class="back-icon" @click="hideTimeLine"/>
-        </div>
-        <tiny-time-line text-position="right" show-divider="true" vertical>
-            <tiny-timeline-item v-for="(item, i) in todayEventList" :key="i" :node="item" :nodeIndex="i">
-                <template #left>
-                    <div class="my-time">
-                        {{ item.time }}
-                    </div>
-                </template>
-                <template #right>
-                    <div class="my-description" :class="[item.theme]">
-                        <p class="tag">{{item.tag}}</p>
-                        <p>{{ item.content }}</p>
-                    </div>
-                </template>
-            </tiny-timeline-item>
-        </tiny-time-line>
+        <tiny-tabs v-model="activeName" tab-style="button-card" size="small">
+            <tiny-tab-item :key="item.name" v-for="item in tabs" :title="item.title" :name="item.name"> </tiny-tab-item>
+        </tiny-tabs>
     </div>
 </template>
 <script>
-import { defineComponent, ref, toRef, computed } from 'vue'
-import { TinyTimeLine, TinyTimelineItem } from '@opentiny/vue'
+import { defineComponent, ref, toRef, computed, reactive } from 'vue'
 import {IconChevronLeft} from '@opentiny/vue-icon'
+import { TinyTabs, TinyTabItem } from '@opentiny/vue'
 export default defineComponent({
-    components: { TinyTimeLine, TinyTimelineItem },
+    components: { TinyTabs, TinyTabItem },
     props: {
         taskList: Array
     },
     emits: ['show-time-line-action'],
     setup(props, {emit}) {
+        const activeName = ref('1')
+        const tabs = reactive([])
+        for (let i = 1; i < 5; i++) {
+        const title = `Tab ${i}`
+        tabs.push({
+            title,
+            name: i + '',
+            content: `${title} content `
+        })
+        }
+
         let eventslist = toRef(props, 'taskList')
         // 获取当前日期对象
         const now = new Date();
@@ -63,13 +59,18 @@ export default defineComponent({
         return {
             todayEventList,
             backActionIcon,
-            hideTimeLine
+            hideTimeLine,
+            activeName,
+            tabs
         }
     }
 })
 </script>
 <style>
-.page-container {}
+.page-container {
+    width: 100%;
+    height: 100%;
+}
 .tiny-timeline-item__pillar{
     margin: 0 20px;
 }
