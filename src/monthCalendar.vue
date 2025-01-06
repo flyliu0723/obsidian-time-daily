@@ -1,6 +1,6 @@
 <template>
   <tiny-calendar-view :events="showEventList" :year="yearCurrent" :month="monthCurrent" 
-    @month-change="monthChange" @mode-change="modeChange" @week-change="weekChange" @year-change="yearChange"
+    @month-change="monthChange" @mode-change="modeChange" @week-change="weekChange" @year-change="yearChange" @selected-date-change="selectedDateChange"
   >
     <template #header="{ slotScope }">
       <p>{{ slotScope.date }}{{ slotScope.weekDay }}</p>
@@ -13,6 +13,7 @@
   import { defineComponent, ref, toRef, computed } from 'vue'
   import { TinyCalendarView } from '@opentiny/vue'
   import {IconRichTextListUnordered} from '@opentiny/vue-icon'
+  import eventBus from './eventBus'
 
   export default defineComponent({
     components: {TinyCalendarView},
@@ -51,24 +52,23 @@
       })
       function monthChange(newVal: string, oldVal: string) {
         monthCurrent.value = Number(newVal)
-        console.log(monthCurrent.value, 'month')
       }
       function yearChange(newVal: string) {
         yearCurrent.value = Number(newVal)
-        console.log(yearCurrent.value, 'year')
       }
       function modeChange(val: string) {
-        console.log(val)
         showTimeLineAction(false)
       }
       function weekChange(weekDate: []) {
-        console.log(weekDate)
       }
 
       const timeLineIcon = IconRichTextListUnordered()
 
       function showTimeLineAction(type: boolean) {
         emit('show-time-line-action', type)
+      }
+      function selectedDateChange(date: any) {
+        eventBus.emit('dateChange', date)
       }
       return {
         eventslist,
@@ -80,7 +80,8 @@
         weekChange,
         showEventList,
         timeLineIcon,
-        showTimeLineAction
+        showTimeLineAction,
+        selectedDateChange
       }
     }
   })

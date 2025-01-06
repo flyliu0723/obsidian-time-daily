@@ -44,14 +44,11 @@ export default defineComponent({
             // .map((item: TFile) => ({...item, todos: []}));
             let realFiles: any[] = []
             formatRealFile(files, realFiles)
-            console.log(realFiles, 1112222)
             let allTodos: Object[] = []
             realFiles.forEach(async (file: any, index: number) => {
                 if (file && file.path) {
                     try {
-                        console.log(file, 222)
                         const fileContent = await myApp.vault.read(file);
-                        console.log(fileContent, 333)
                         const todos = parseTodos(fileContent, file.name.replace('.md', ''));
                         file.todos = todos || []
                         allTodos = [...allTodos, ...todos]
@@ -69,7 +66,6 @@ export default defineComponent({
             formatTime()
         })
         function formatRealFile(files: [], result: any[]) {
-            console.log(files, 222111)
             files.forEach((item: any) => {
                 if(item.children && item.children.length) {
                     formatRealFile(item.children, result)
@@ -204,6 +200,19 @@ export default defineComponent({
         function showTimeLineAction(type: boolean) {
             showTimeLine.value = type
         }
+
+        // 获取当前日期对象
+        const now = new Date();
+
+        // 获取当前年份
+        const year = now.getFullYear();
+
+        // 获取当前月份，月份是从0开始的，所以需要加1
+        const month = now.getMonth() + 1;
+
+        console.log(`当前年份：${year}`);
+        console.log(`当前月份：${month}`);
+
         return {
             taskList,
             renderCanledar,
@@ -239,7 +248,7 @@ export default defineComponent({
     display: inline-block;
 }
 .daily-container .task{
-    width: 300px;
+    width: 350px;
     height: 100%;
     display: inline-block;
 }

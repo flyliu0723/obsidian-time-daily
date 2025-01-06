@@ -1,31 +1,46 @@
 <template>
     <div class="page-container">
         <tiny-tabs v-model="activeName" tab-style="button-card" size="small">
-            <tiny-tab-item :key="item.name" v-for="item in tabs" :title="item.title" :name="item.name"> </tiny-tab-item>
+            <tiny-tab-item :key="item.name" v-for="item in tabs" :title="item.title" :name="item.name"> 
+                
+                <tiny-time-line text-position="right" show-divider="true" vertical v-if="item.name == '1'">
+                    <tiny-timeline-item v-for="(item, i) in todayEventList" :key="i" :node="item" :nodeIndex="i">
+                        <template #left>
+                            <div class="my-time">
+                                {{ item.time.slice(5) }}
+                            </div>
+                        </template>
+                        <template #right>
+                            <div class="my-description" :class="[item.theme]">
+                                <p>{{ item.content }}</p>
+                            </div>
+                        </template>
+                    </tiny-timeline-item>
+                </tiny-time-line>
+            </tiny-tab-item>
         </tiny-tabs>
     </div>
 </template>
 <script>
-import { defineComponent, ref, toRef, computed, reactive } from 'vue'
+import { defineComponent, ref, toRef, computed, reactive, onBeforeUnmount } from 'vue'
 import {IconChevronLeft} from '@opentiny/vue-icon'
-import { TinyTabs, TinyTabItem } from '@opentiny/vue'
+import { TinyTabs, TinyTabItem, TinyTimeLine, TinyTimelineItem } from '@opentiny/vue'
+import eventBus from './eventBus'
 export default defineComponent({
-    components: { TinyTabs, TinyTabItem },
+    components: { TinyTabs, TinyTabItem, TinyTimeLine, TinyTimelineItem },
     props: {
         taskList: Array
     },
     emits: ['show-time-line-action'],
     setup(props, {emit}) {
         const activeName = ref('1')
-        const tabs = reactive([])
-        for (let i = 1; i < 5; i++) {
-        const title = `Tab ${i}`
-        tabs.push({
-            title,
-            name: i + '',
-            content: `${title} content `
-        })
-        }
+        const tabs = reactive([{
+            title: 'Today Tasks',
+            name: '1'
+        }, {
+            title: 'Something',
+            name: '2'
+        }])
 
         let eventslist = toRef(props, 'taskList')
         // 获取当前日期对象
@@ -40,6 +55,16 @@ export default defineComponent({
         const day = now.getDate()
 
         let yearCurrent = ref(year), monthCurrent = ref(month), dayCurrent = ref(day)
+        function changeDate(date) {
+            let dateArr = date.split('-')
+            yearCurrent.value = Number(dateArr[0])
+            monthCurrent.value = Number(dateArr[1])
+            dayCurrent.value = Number(dateArr[2])
+        }
+        eventBus.on('dateChange', changeDate)
+        onBeforeUnmount(() => {
+            eventBus.off('dateChange', changeDate)
+        })
         // 根据年月日筛选对应日期的事件
         let todayEventList = computed(() => {
             return eventslist.value.filter((item) => {
@@ -48,10 +73,16 @@ export default defineComponent({
             }).map(item => {
                 return {
                     ...item,
-                    time: item.start
+                    time: item.end || item.start
                 }
             })
         })
+
+        const activeTime = ref(1)
+        function clickTimeItem(index) {
+            activeTime.value = index
+        }
+
         const backActionIcon = IconChevronLeft()
         function hideTimeLine() {
             emit('show-time-line-action', false)
@@ -61,7 +92,9 @@ export default defineComponent({
             backActionIcon,
             hideTimeLine,
             activeName,
-            tabs
+            tabs,
+            clickTimeItem,
+            activeTime
         }
     }
 })
@@ -70,6 +103,7 @@ export default defineComponent({
 .page-container {
     width: 100%;
     height: 100%;
+    overflow: auto;
 }
 .tiny-timeline-item__pillar{
     margin: 0 20px;
