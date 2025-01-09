@@ -2,10 +2,9 @@
     <div class="daily-container">
         <div class="content">
             <month-calendar :taskList="taskList" @show-time-line-action="showTimeLineAction"/>
-             <!-- <task v-if="renderCanledar && showTimeLine" :taskList="taskList"  @show-time-line-action="showTimeLineAction"/> -->
         </div>
         <div class="task">
-            <task :taskList="taskList"  @show-time-line-action="showTimeLineAction"/>
+            <task :taskList="taskList" :memoList="memoList"  @show-time-line-action="showTimeLineAction"/>
         </div>
     </div>
 </template>
@@ -38,24 +37,28 @@ export default defineComponent({
             }
         };
         let renderCanledar = ref<boolean>(false);
-        let dailyList = ref<DailyFile[]>([]), timesRef = ref<Times[]>([]), taskList = ref<object[]>([])
+        let dailyList = ref<DailyFile[]>([]), timesRef = ref<Times[]>([]), taskList = ref<object[]>([]), memoList = ref<object[]>([]);
         onMounted(async () => {
             let files = myApp.vault.getAbstractFileByPath('01Inbox/daily').children.filter((item: TFile) => item.name != 'archives')
             // .map((item: TFile) => ({...item, todos: []}));
             let realFiles: any[] = []
             formatRealFile(files, realFiles)
-            let allTodos: Object[] = []
+            let allTodos: Object[] = [], allMemos: Object[] = []
             realFiles.forEach(async (file: any, index: number) => {
                 if (file && file.path) {
                     try {
                         const fileContent = await myApp.vault.read(file);
                         const todos = parseTodos(fileContent, file.name.replace('.md', ''));
+                        const memos = parseMemoContent(fileContent, file.name.replace('.md', ''));
                         file.todos = todos || []
+                        allMemos = [...allMemos, ...memos]
                         allTodos = [...allTodos, ...todos]
                         if(index == realFiles.length - 1) {
                             taskList.value = allTodos
                             dailyList.value = realFiles;
+                            memoList.value = allMemos
                             renderCanledar.value = true
+                            console.log(memoList)
 
                         }
                     } catch (error) {
@@ -86,6 +89,42 @@ export default defineComponent({
                 return []
             }
         }
+
+        function parseMemoContent(markdownContent: string, date: string) {
+            // 使用正则表达式匹配到memo标题内的内容
+            const memoContentMatch = markdownContent.match(/## memo\n(.*?)(?=\n##|\n---|$)/s);
+            if (!memoContentMatch) {
+                return [];
+            }
+
+            const memoContent = memoContentMatch[1].trim();
+            const memoItems = [];
+
+            // 使用正则表达式匹配到每个时间点的内容
+            const timeContentMatches = memoContent.matchAll(/- (\d{2}:\d{2})\s+(.*?)(?=\n- \d{2}:\d{2}|\n##|\n---|$)/gs);
+
+            for (const match of timeContentMatches) {
+                const time = match[1];
+                const content = match[2].trim();
+
+                // 提取标签
+                const tagsMatch = content.match(/#(\S+)/g);
+                const tags = tagsMatch ? tagsMatch.map(tag => tag.trim()) : [];
+
+                // 提取主要内容，去除标签
+                const mainContent = content.replace(/#(\S+)/g, '').trim();
+
+                memoItems.push({
+                    date,
+                    time,
+                    mainContent,
+                    tags
+                });
+            }
+
+            return memoItems;
+        }
+
 
         function formatTime() {
             let times: string[] = [...new Set(dailyList.value.map((d: any) => d.basename))].filter((d: string) => isValidDate(d))
@@ -215,9 +254,10 @@ export default defineComponent({
 
         return {
             taskList,
+            memoList,
             renderCanledar,
             showTimeLine,
-            showTimeLineAction
+            showTimeLineAction,
         }
     }
 })

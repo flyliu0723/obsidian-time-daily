@@ -17,6 +17,21 @@
                         </template>
                     </tiny-timeline-item>
                 </tiny-time-line>
+                <tiny-time-line text-position="right" show-divider="true" vertical v-else-if="item.name == '2'">
+                    <tiny-timeline-item v-for="(item, i) in todayMemo" :key="i" :node="item" :nodeIndex="i">
+                        <template #left>
+                            <div class="my-time">
+                                {{ item.date.slice(5) }} {{ item.time }}
+                            </div>
+                        </template>
+                        <template #right>
+                            <div class="my-description">
+                                <p>{{ item.mainContent }}</p>
+                                <p>{{ item.tags.join() }}</p>
+                            </div>
+                        </template>
+                    </tiny-timeline-item>
+                </tiny-time-line>
             </tiny-tab-item>
         </tiny-tabs>
     </div>
@@ -29,7 +44,8 @@ import eventBus from './eventBus'
 export default defineComponent({
     components: { TinyTabs, TinyTabItem, TinyTimeLine, TinyTimelineItem },
     props: {
-        taskList: Array
+        taskList: Array,
+        memoList: Array
     },
     emits: ['show-time-line-action'],
     setup(props, {emit}) {
@@ -42,7 +58,7 @@ export default defineComponent({
             name: '2'
         }])
 
-        let eventslist = toRef(props, 'taskList')
+        let eventslist = toRef(props, 'taskList'), memosList = toRef(props, 'memoList')
         // 获取当前日期对象
         const now = new Date();
 
@@ -77,6 +93,19 @@ export default defineComponent({
                 }
             })
         })
+        let todayMemo = computed(() => {
+            let result = memosList.value.filter((item => {
+                let yearMonthDay = item.date.split('-')
+                return Number(yearMonthDay[0]) == yearCurrent.value && Number(yearMonthDay[1]) == monthCurrent.value && Number(yearMonthDay[2]) == dayCurrent.value
+            }))
+            console.log(result, 111222)
+            return result.map(item => {
+                return {
+                    ...item,
+                    time: item.date
+                }
+            })
+        })
 
         const activeTime = ref(1)
         function clickTimeItem(index) {
@@ -89,6 +118,7 @@ export default defineComponent({
         }
         return {
             todayEventList,
+            todayMemo,
             backActionIcon,
             hideTimeLine,
             activeName,
@@ -119,7 +149,6 @@ export default defineComponent({
 }
 .my-description{
     padding: 20px;
-    height: 80px;
     color: #4b4f4f;
     width: 250px;
     border-radius: 4px;
